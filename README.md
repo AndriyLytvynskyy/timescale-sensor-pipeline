@@ -8,8 +8,11 @@ through Kafka, stores them in **TimescaleDB**, and exposes two kinds of views:
 
 Both views are served to a lightweight read **query API** and pre-provisioned **Grafana** dashboards.
 
+![Grafana sensor dashboard](docs/grafana-dashboard.png)
+
 ---
 
+## Architecture
 ## Architecture
 
 ```
