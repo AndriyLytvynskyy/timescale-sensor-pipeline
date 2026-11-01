@@ -12,7 +12,13 @@ CREATE TABLE IF NOT EXISTS sensor_events (
     location     TEXT             NOT NULL,
     value        DOUBLE PRECISION NOT NULL,
     unit         TEXT             NOT NULL,
-    quality      SMALLINT         NOT NULL DEFAULT 100
+    quality      SMALLINT         NOT NULL DEFAULT 100,
+    -- A reading is uniquely identified by its sensor and timestamp. This makes
+    -- the consumer's INSERT ... ON CONFLICT (sensor_id, time) DO NOTHING a true
+    -- idempotent write, so replayed Kafka batches can't create duplicate rows.
+    -- On a hypertable a unique constraint must include the partitioning column
+    -- (time), which it does here.
+    UNIQUE (sensor_id, time)
 );
 
 SELECT create_hypertable('sensor_events', 'time', if_not_exists => TRUE);
