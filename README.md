@@ -209,6 +209,3 @@ Copy `.env.example` → `.env` to override. Defaults in parentheses.
 └── grafana/
     └── provisioning/           # datasource + sensors dashboard
 ```
-
-> `main.py` at the repo root is PyCharm boilerplate and is not part of the pipeline.
-```
