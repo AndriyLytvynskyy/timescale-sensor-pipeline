@@ -13,7 +13,6 @@ Both views are served to a lightweight read **query API** and pre-provisioned **
 ---
 
 ## Architecture
-## Architecture
 
 ```
                        ┌──────────────────────┐
