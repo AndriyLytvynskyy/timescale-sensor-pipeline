@@ -20,7 +20,7 @@ BATCH_TIMEOUT   = float(os.getenv("BATCH_TIMEOUT", "2.0"))
 INSERT_SQL = """
     INSERT INTO sensor_events (time, sensor_id, sensor_type, location, value, unit, quality)
     VALUES %s
-    ON CONFLICT DO NOTHING
+    ON CONFLICT (sensor_id, time) DO NOTHING
 """
 
 
