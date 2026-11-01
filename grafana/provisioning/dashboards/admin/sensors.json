@@ -1,0 +1,125 @@
+{
+  "title": "Sensor Overview",
+  "uid": "sensor-overview",
+  "schemaVersion": 38,
+  "refresh": "10s",
+  "time": { "from": "now-1h", "to": "now" },
+  "templating": {
+    "list": [
+      {
+        "name": "sensor_type",
+        "label": "Sensor Type",
+        "type": "query",
+        "datasource": { "uid": "timescaledb" },
+        "query": "SELECT DISTINCT sensor_type FROM sensor_latest ORDER BY sensor_type",
+        "refresh": 1,
+        "includeAll": true,
+        "allValue": ".*",
+        "current": { "text": "All", "value": "$__all" },
+        "sort": 1
+      }
+    ]
+  },
+  "panels": [
+    {
+      "id": 1,
+      "title": "Temperature (°C)",
+      "type": "timeseries",
+      "gridPos": { "x": 0, "y": 0, "w": 12, "h": 8 },
+      "datasource": { "uid": "timescaledb" },
+      "targets": [
+        {
+          "rawSql": "SELECT bucket AS time, sensor_id, avg_value FROM sensor_stats_1min WHERE sensor_type = 'temperature' AND $__timeFilter(bucket) ORDER BY bucket",
+          "format": "time_series",
+          "refId": "A"
+        }
+      ],
+      "fieldConfig": { "defaults": { "unit": "celsius" } }
+    },
+    {
+      "id": 2,
+      "title": "Humidity (%)",
+      "type": "timeseries",
+      "gridPos": { "x": 12, "y": 0, "w": 12, "h": 8 },
+      "datasource": { "uid": "timescaledb" },
+      "targets": [
+        {
+          "rawSql": "SELECT bucket AS time, sensor_id, avg_value FROM sensor_stats_1min WHERE sensor_type = 'humidity' AND $__timeFilter(bucket) ORDER BY bucket",
+          "format": "time_series",
+          "refId": "A"
+        }
+      ],
+      "fieldConfig": { "defaults": { "unit": "percent" } }
+    },
+    {
+      "id": 3,
+      "title": "CO₂ (ppm)",
+      "type": "timeseries",
+      "gridPos": { "x": 0, "y": 8, "w": 12, "h": 8 },
+      "datasource": { "uid": "timescaledb" },
+      "targets": [
+        {
+          "rawSql": "SELECT bucket AS time, sensor_id, avg_value FROM sensor_stats_1min WHERE sensor_type = 'co2' AND $__timeFilter(bucket) ORDER BY bucket",
+          "format": "time_series",
+          "refId": "A"
+        }
+      ]
+    },
+    {
+      "id": 4,
+      "title": "Vibration (mm/s)",
+      "type": "timeseries",
+      "gridPos": { "x": 12, "y": 8, "w": 12, "h": 8 },
+      "datasource": { "uid": "timescaledb" },
+      "targets": [
+        {
+          "rawSql": "SELECT bucket AS time, sensor_id, avg_value FROM sensor_stats_1min WHERE sensor_type = 'vibration' AND $__timeFilter(bucket) ORDER BY bucket",
+          "format": "time_series",
+          "refId": "A"
+        }
+      ]
+    },
+    {
+      "id": 5,
+      "title": "Latest Sensor Readings — $sensor_type",
+      "type": "table",
+      "gridPos": { "x": 0, "y": 16, "w": 24, "h": 8 },
+      "datasource": { "uid": "timescaledb" },
+      "targets": [
+        {
+          "rawSql": "SELECT sensor_id, sensor_type, location, round(value::numeric, 2) AS value, unit, quality, last_seen FROM sensor_latest WHERE sensor_type ~ '^${sensor_type:regex}$' ORDER BY sensor_type, sensor_id LIMIT 100",
+          "format": "table",
+          "refId": "A"
+        }
+      ]
+    },
+    {
+      "id": 6,
+      "title": "Current Status by Type",
+      "type": "table",
+      "gridPos": { "x": 0, "y": 24, "w": 12, "h": 6 },
+      "datasource": { "uid": "timescaledb" },
+      "targets": [
+        {
+          "rawSql": "SELECT sensor_type, COUNT(*) AS total_sensors, ROUND(AVG(value)::numeric, 2) AS avg_value, ROUND(MIN(value)::numeric, 2) AS min_value, ROUND(MAX(value)::numeric, 2) AS max_value FROM sensor_latest GROUP BY sensor_type ORDER BY sensor_type",
+          "format": "table",
+          "refId": "A"
+        }
+      ]
+    },
+    {
+      "id": 7,
+      "title": "Offline Sensors (no data > 2 min)",
+      "type": "table",
+      "gridPos": { "x": 12, "y": 24, "w": 12, "h": 6 },
+      "datasource": { "uid": "timescaledb" },
+      "targets": [
+        {
+          "rawSql": "SELECT sensor_id, sensor_type, location, last_seen, EXTRACT(EPOCH FROM (now() - last_seen))::int AS seconds_ago FROM sensor_latest WHERE last_seen < now() - INTERVAL '2 minutes' ORDER BY last_seen ASC",
+          "format": "table",
+          "refId": "A"
+        }
+      ]
+    }
+  ]
+}
